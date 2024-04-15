@@ -17,8 +17,7 @@ using namespace std;
 
 
 // Add prototypes of helper functions here
-void solve(const std::string& in, const std::string& floating, std::string currStr, std::string pool, std::set<std::string>& s);
-void solve2(const std::string& in, const std::string& floating, std::string currStr, std::string pool, std::set<std::string>& s);
+void solve(const std::string& in, const std::string& floating, std::string currStr, std::string pool, std::set<std::string>& s, int mode);
 // Definition of primary wordle function
 std::set<std::string> wordle(
         const std::string& in,
@@ -33,11 +32,11 @@ std::set<std::string> wordle(
     std::set<std::string> s2;
     std::string alphabet = "abcdefghijklmnopqrstuvwxyz";
     std::set<std::string> s3;
-    solve(in, floating, currStr, floating, s);
+    solve(in, floating, currStr, floating, s, 0);
     for (it = s.begin(); it != s.end(); ++it){
-        //cout << *it << endl;
+        cout << *it << endl;
         currStr = *it;
-        solve(*it, alphabet, currStr, alphabet, s2);
+        solve(*it, alphabet, currStr, alphabet, s2, 1);
     }
     //cout << "DIVIDER" << endl;
     for (it2 = s2.begin(); it2 != s2.end(); ++it2){
@@ -50,7 +49,7 @@ std::set<std::string> wordle(
 }
 
 // Define any helper functions here
-void solve(const std::string& in, const std::string& floating, std::string currStr, std::string pool, std::set<std::string>& s){
+void solve(const std::string& in, const std::string& floating, std::string currStr, std::string pool, std::set<std::string>& s, int mode){
     //Check if word is full
     int a = 0;
     for (int i = 0; i < currStr.length(); i++){
@@ -78,8 +77,16 @@ void solve(const std::string& in, const std::string& floating, std::string currS
         for (int j = 0; j < currStr.length(); j++){
             if (currStr[j] == '-'){
                 currStr[j] = pool[pool.length()-1];
-                std::string newPool = pool.substr(0, pool.length()-1);
-                solve(in, floating, currStr, newPool, s);
+                std::string newPool;
+                if (mode == 0) {
+                    newPool = pool.substr(0, pool.length()-1);
+                    solve(in, floating, currStr, newPool, s, 0);
+                    //cout << currStr << endl;
+                }
+                else if (mode == 1) {
+                    newPool = pool;
+                    solve(in, floating, currStr, newPool, s, 1);
+                }
                 currStr[j] = '-';
             }
         }
