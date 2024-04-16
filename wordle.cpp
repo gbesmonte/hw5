@@ -2,17 +2,13 @@
 // For debugging
 #include <iostream>
 // For std::remove
-#include <algorithm> 
+#include <algorithm>
 #include <map>
 #include <set>
 #endif
 
 #include "wordle.h"
 #include "dict-eng.h"
-
-#include <vector>
-#include <queue>
-#include <deque>
 using namespace std;
 
 
