@@ -82,7 +82,7 @@ bool recursive_helper(AvailabilityMatrix& avail,
     if (isValidState(avail, dailyNeed, maxShifts, sched, daysWorked) && rowAvail == sched.size()){
         return true;
     }
-    for (Worker_T col = 0; col < avail.size(); col++){
+    for (Worker_T col = 0; col < avail[0].size(); col++){
         if (avail[rowAvail][col] == 1){
             sched[rowAvail][day] = col;
             avail[rowAvail][col] = false;
