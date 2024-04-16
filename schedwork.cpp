@@ -28,11 +28,11 @@ bool recursive_helper(AvailabilityMatrix& avail,
                       int row,
                       int col,
                       int* daysWorked);
-bool isValidState(const AvailabilityMatrix& avail,
-                  const size_t dailyNeed,
-                  const size_t maxShifts,
-                  DailySchedule& sched,
-                  int* daysWorked);
+void fillDaysWorked(int* daysWorked, int index, int maxSize);
+bool isValidStateR(const size_t maxShifts,
+                   int* daysWorked,
+                   int maxSize,
+                   int index);
 
 // Add your implementation of schedule() and other helper functions here
 
@@ -50,9 +50,8 @@ bool schedule(
     // Add your code below
     int daysWorked[avail[0].size()];
     AvailabilityMatrix availcopy = avail;
-    for (int i = 0; i < avail[0].size(); i++){
-        daysWorked[i] = 0;
-    }
+    int maxSize = avail[0].size();
+    fillDaysWorked(daysWorked, 0, maxSize);
 
     for (int i = 0; i < avail.size(); i++){
         vector<Worker_T> v;
@@ -63,6 +62,15 @@ bool schedule(
     }
     bool b =  recursive_helper(availcopy, dailyNeed, maxShifts, sched, 0, 0, daysWorked);
     return b;
+}
+
+void fillDaysWorked(int* daysWorked, int index, int maxSize){
+    if (index > maxSize - 1){
+        return;
+    }
+
+    daysWorked[index] = 0;
+    fillDaysWorked(daysWorked, index + 1, maxSize);
 }
 //for each column in availability matrix, 0 to k
 //if worker is available, add worker to sched
@@ -79,7 +87,7 @@ bool recursive_helper(AvailabilityMatrix& avail,
                       int rowAvail,
                       int day,
                       int* daysWorked){
-    if (isValidState(avail, dailyNeed, maxShifts, sched, daysWorked) && rowAvail == sched.size()){
+    if (isValidStateR(maxShifts, daysWorked, avail[0].size(), 0) && rowAvail == sched.size()){
         return true;
     }
     for (Worker_T col = 0; col < avail[0].size(); col++){
@@ -87,7 +95,7 @@ bool recursive_helper(AvailabilityMatrix& avail,
             sched[rowAvail][day] = col;
             avail[rowAvail][col] = false;
             daysWorked[col]++;
-            if (isValidState(avail, dailyNeed, maxShifts, sched, daysWorked)){
+            if (isValidStateR(maxShifts, daysWorked, avail[0].size(), 0)){
                 if (day == dailyNeed-1){
                     if (recursive_helper(avail, dailyNeed, maxShifts, sched, rowAvail+1, 0, daysWorked)){
                         return true;
@@ -107,25 +115,18 @@ bool recursive_helper(AvailabilityMatrix& avail,
     return false;
 }
 
-bool isValidState(const AvailabilityMatrix& avail,
-                  const size_t dailyNeed,
-                  const size_t maxShifts,
-                  DailySchedule& sched,
-                  int* daysWorked){
-    //if workers above max
-    //for all rows n
-        //for all columns d
-            //if count..
-    //maybe we should make arr of size k that holds the amount of days each nurse is working
-    for (int i = 0; i < avail[0].size(); i++){
-        if (daysWorked[i] > maxShifts){
-            return false;
-        }
-    }
-    //return false
 
-    //i think availability will always match with this implementation
-    //if availability does not match
-    //return false
-    return true;
+bool isValidStateR(const size_t maxShifts,
+                  int* daysWorked,
+                  int maxSize,
+                  int index){
+    if (index > maxSize - 1){
+        return true;
+    }
+
+    if (daysWorked[index] > maxShifts){
+        return false;
+    }
+
+    return isValidStateR(maxShifts, daysWorked, maxSize, index + 1);
 }
