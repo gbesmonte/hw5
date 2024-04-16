@@ -50,8 +50,11 @@ bool schedule(
     // Add your code below
     int daysWorked[avail[0].size()];
     AvailabilityMatrix availcopy = avail;
-    for (int i = 0; i < avail.size(); i++){
+    for (int i = 0; i < avail[0].size(); i++){
         daysWorked[i] = 0;
+    }
+
+    for (int i = 0; i < avail.size(); i++){
         vector<Worker_T> v;
         for (int j = 0; j < dailyNeed; j++){
             v.push_back(INVALID_ID);
