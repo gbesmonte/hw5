@@ -21,18 +21,18 @@ static const Worker_T INVALID_ID = (unsigned int)-1;
 
 
 // Add prototypes for any helper functions here
-bool recursive_helper(const AvailabilityMatrix& avail,
+bool recursive_helper(AvailabilityMatrix& avail,
                       const size_t dailyNeed,
                       const size_t maxShifts,
                       DailySchedule& sched,
                       int row,
                       int col,
-                      int*& daysWorked);
+                      int* daysWorked);
 bool isValidState(const AvailabilityMatrix& avail,
                   const size_t dailyNeed,
                   const size_t maxShifts,
                   DailySchedule& sched,
-                  int*& daysWorked);
+                  int* daysWorked);
 
 // Add your implementation of schedule() and other helper functions here
 
@@ -48,44 +48,57 @@ bool schedule(
     }
     sched.clear();
     // Add your code below
-    int* daysWorked = new int[avail[0].size()];
-    bool b =  recursive_helper(avail, dailyNeed, maxShifts, sched, 0, 0, daysWorked);
-    delete[] daysWorked;
+    int daysWorked[avail[0].size()];
+    AvailabilityMatrix availcopy = avail;
+    for (int i = 0; i < avail.size(); i++){
+        daysWorked[i] = 0;
+        vector<Worker_T> v;
+        for (int j = 0; j < dailyNeed; j++){
+            v.push_back(INVALID_ID);
+        }
+        sched.push_back(v);
+    }
+    bool b =  recursive_helper(availcopy, dailyNeed, maxShifts, sched, 0, 0, daysWorked);
     return b;
 }
-
-bool recursive_helper(const AvailabilityMatrix& avail,
+//for each column in availability matrix, 0 to k
+//if worker is available, add worker to sched
+//if isValidState
+//case 1: if d workers in day n
+//recurse next day
+//case 2: if <d workers in day n
+//recurse same day
+//remove choice
+bool recursive_helper(AvailabilityMatrix& avail,
                       const size_t dailyNeed,
                       const size_t maxShifts,
                       DailySchedule& sched,
                       int rowAvail,
                       int day,
-                      int*& daysWorked){
-    if (isValidState(avail, dailyNeed, maxShifts, sched, daysWorked) && rowAvail == sched.size() && day == dailyNeed){
+                      int* daysWorked){
+    if (isValidState(avail, dailyNeed, maxShifts, sched, daysWorked) && rowAvail == sched.size()){
         return true;
     }
-    //for each column in availability matrix, 0 to k
-    //if worker is available, add worker to sched
-        //if isValidState
-            //case 1: if d workers in day n
-                //recurse next day
-            //case 2: if <d workers in day n
-                //recurse same day
-    //remove choice
     for (Worker_T col = 0; col < avail.size(); col++){
         if (avail[rowAvail][col] == 1){
-            sched[rowAvail].push_back(col);
+            sched[rowAvail][day] = col;
+            avail[rowAvail][col] = false;
             daysWorked[col]++;
             if (isValidState(avail, dailyNeed, maxShifts, sched, daysWorked)){
                 if (day == dailyNeed-1){
-                    recursive_helper(avail, dailyNeed, maxShifts, sched, rowAvail+1, 0, daysWorked);
+                    if (recursive_helper(avail, dailyNeed, maxShifts, sched, rowAvail+1, 0, daysWorked)){
+                        return true;
+                    }
                 }
                 else{
-                    recursive_helper(avail, dailyNeed, maxShifts, sched, rowAvail, day +1, daysWorked);
+                    if (recursive_helper(avail, dailyNeed, maxShifts, sched, rowAvail, day +1, daysWorked)) {
+                        return true;
+                    }
                 }
             }
             daysWorked[col]--;
-            sched[rowAvail].pop_back();
+            avail[rowAvail][col] = true;
+            sched[rowAvail][day] = INVALID_ID;
         }
     }
     return false;
@@ -95,7 +108,7 @@ bool isValidState(const AvailabilityMatrix& avail,
                   const size_t dailyNeed,
                   const size_t maxShifts,
                   DailySchedule& sched,
-                  int*& daysWorked){
+                  int* daysWorked){
     //if workers above max
     //for all rows n
         //for all columns d
